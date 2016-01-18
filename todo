@@ -1,0 +1,2 @@
+character has world_x and world_y whcih should hold
+world tile values but instead holds pixel values on screen
