@@ -48,13 +48,15 @@ function camera:draw()
 
     -- draw every visible tile, offset by those amounts
     for _, layer in ipairs(self.map.layers) do
-        for h=y_floor,y_floor+self.screen_tiles_height+1 do
-            for w=x_floor,x_floor+self.screen_tiles_width+1 do
-                local offset = self.pos_converter:world_to_offset(w,h)
-                local tile_id = layer.data[offset]
-                local meta_img = self.images[tile_id]
-                if meta_img then
-                    love.graphics.draw(meta_img.graphic, (w-x_offset-x_floor) * self.map.tilewidth, (h-y_offset-y_floor) * self.map.tileheight)
+        for h=y_floor-1,y_floor+self.screen_tiles_height+1 do -- -1/+1 to render outside visible area for smoothness
+            for w=x_floor-1,x_floor+self.screen_tiles_width+1 do
+                if w >=0 and w < self.map.width and h >= 0 and h < self.map.height then
+                    local offset = self.pos_converter:world_to_offset(w,h)
+                    local tile_id = layer.data[offset]
+                    local meta_img = self.images[tile_id]
+                    if meta_img then
+                        love.graphics.draw(meta_img.graphic, (w-x_offset-x_floor) * self.map.tilewidth, (h-y_offset-y_floor) * self.map.tileheight)
+                    end
                 end
             end
         end
