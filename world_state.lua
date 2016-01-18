@@ -26,6 +26,7 @@ function world_state.init()
     love.keypressed = world_state.keypressed 
     pos_converter:init(camera.xy, level_one)
     camera:init(level_one, pos_converter)
+    -- camera:center_on(m_player.collidable.world_x, m_player.collidable.world_y)
     collider:init(level_one, pos_converter)
     collider:register(m_player.collidable)
 end
@@ -37,8 +38,8 @@ function world_state.draw()
 end
 
 function world_state.update(dt)
-    -- camera:set_pos(m_player.collidable.world_x, m_player.collidable.world_y)
     m_player:move(dt, collider)
+    camera:center_on(m_player.collidable.world_x, m_player.collidable.world_y)
 end
 
 return world_state

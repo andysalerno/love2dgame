@@ -2,8 +2,18 @@ local camera = {
     map = nil,
     pos_converter = nil,
     images = {},
-    xy = {0, 0},
+    xy = {10, 10},
 }
+
+function camera:center_on(world_x, world_y)
+    local half_pix_width = math.floor(love.graphics.getWidth() / 2)
+    local half_pix_height = math.floor(love.graphics.getHeight() / 2)
+
+    local half_width = half_pix_width / self.map.tilewidth
+    local half_height = half_pix_height / self.map.tileheight
+
+    self:set_pos(world_x - half_width, world_y - half_height)
+end
 
 function camera:set_pos(world_x, world_y)
     self.xy[1] = world_x
@@ -29,14 +39,22 @@ end
 
 function camera:draw()
     if self.map == nil then return end
-    for _, layer in pairs(self.map.layers) do
-        for y = 0, self.screen_tiles_height do
-            for x = 0, self.screen_tiles_width do
-                local offset = self.pos_converter:screen_to_offset(x, y)
-                local tile_gid = layer.data[offset]
-                if self.images[tile_gid] then
-                    local meta_image = self.images[tile_gid]
-                    love.graphics.draw(meta_image.graphic, x * self.map.tilewidth, y * self.map.tileheight) 
+
+    -- how far offset [0-1) tile we are in each direction
+    local x_floor = math.floor(self.xy[1])
+    local y_floor = math.floor(self.xy[2])
+    local x_offset = self.xy[1] - x_floor 
+    local y_offset = self.xy[2] - y_floor
+
+    -- draw every visible tile, offset by those amounts
+    for _, layer in ipairs(self.map.layers) do
+        for h=y_floor,y_floor+self.screen_tiles_height+1 do
+            for w=x_floor,x_floor+self.screen_tiles_width+1 do
+                local offset = self.pos_converter:world_to_offset(w,h)
+                local tile_id = layer.data[offset]
+                local meta_img = self.images[tile_id]
+                if meta_img then
+                    love.graphics.draw(meta_img.graphic, (w-x_offset-x_floor) * self.map.tilewidth, (h-y_offset-y_floor) * self.map.tileheight)
                 end
             end
         end
