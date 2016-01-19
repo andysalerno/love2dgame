@@ -9,7 +9,7 @@ collider.collision_offset = {} -- map x,y location to the tiles there? is this a
 collider.pos_converter = nil
 
 function collider:register(collidable)
-    if collidable.world_x == nil or collidable.world_y == nil 
+    if collidable.world_x == nil or collidable.world_y == nil
         or collidable.pix_width == nil or collidable.pix_height == nil then
         print('tried to register collision collidable without world_x or world_y!')
         return
