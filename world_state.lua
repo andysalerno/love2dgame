@@ -1,4 +1,4 @@
-local level_one = require('maps/huge_level')
+local level_one = require('maps/thirtytwo')
 local camera = require('camera')
 local pos_converter = require('pos_converter')
 local collider = require('collider')

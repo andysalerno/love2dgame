@@ -1,7 +1,7 @@
 local main_menu = {}
 local menu_x = 200
 local menu_y = 100
-local font_size = 64
+local font_size = 12 
 local menu_font = love.graphics.newFont(font_size)
 local menu_options = {"New Game", "Settings", "Exit"}
 local selected_option = 1 -- index of selected item in menu_options 

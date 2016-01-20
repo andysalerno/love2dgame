@@ -20,6 +20,7 @@ function camera:set_pos(world_x, world_y)
 end
 
 function camera:init(map, pos_converter)
+    print('camera init')
     self.pos_converter = pos_converter
     self.map = map 
     self.half_pix_width = math.floor(love.graphics.getWidth() / 2)
@@ -29,27 +30,47 @@ function camera:init(map, pos_converter)
 
     if self.map.tilesets[1].image == nil then print("couldn't access world tileset!") end
     self.world_tileset.image = love.graphics.newImage(self.map.tilesets[1].image)
+    self.world_tileset.image:setFilter("nearest", "nearest")
+    print('opened image ' .. self.map.tilesets[1].image)
     self.world_tileset.pix_width = self.world_tileset.image:getWidth()
     self.world_tileset.pix_height = self.world_tileset.image:getHeight()
+    if self.world_tileset.pix_width % self.map.tilewidth ~= 0 then print('tileset not a multiple of tilewidth!') end
+    if self.world_tileset.pix_height % self.map.tileheight ~= 0 then print('tileset not a multiple of tileheight!') end
     self.world_tileset.tiles_width = self.world_tileset.pix_width / self.map.tilewidth
     self.world_tileset.tiles_height = self.world_tileset.pix_height / self.map.tileheight
 
     -- one spriteBatch per layer, sourcing same tileset
     for _, _ in ipairs(self.map.layers) do
+        print('adding tileset spritebatch layer...')
         table.insert(self.spriteBatches,
             love.graphics.newSpriteBatch(self.world_tileset.image,
-            (self.screen_tiles_width * self.screen_tiles_height) + 1))
+            (self.screen_tiles_width * self.screen_tiles_height) + 1)) 
     end
 
-    for y=0,self.world_tileset.pix_height-self.map.tileheight do
-        for x=0,self.world_tileset.pix_width-self.map.tilewidth do
-            local quad = love.graphics.newQuad(x,y,self.map.tilewidth,self.map.tileheight,0,0)
+
+    self.quads = {}
+    for y=0,self.world_tileset.tiles_height-1 do
+        for x=0,self.world_tileset.tiles_width-1 do
+            local quad = love.graphics.newQuad(
+                x * self.map.tilewidth, y * self.map.tileheight,
+                self.map.tilewidth, self.map.tileheight,
+                self.world_tileset.image:getWidth(), self.world_tileset.image:getHeight())
             table.insert(self.quads, quad)
         end
     end
 end
 
-function camera:baddraw()
+function camera:test_draw()
+    for y=0,self.world_tileset.tiles_height-1 do
+        for x=0,self.world_tileset.tiles_width-1 do
+            local quad_num = y * self.world_tileset.tiles_width + x + 1
+            love.graphics.draw(self.world_tileset.image, self.quads[quad_num], x * self.map.tilewidth, y * self.map.tileheight)
+        end
+    end
+end
+
+
+function camera:drawdraw()
     if self.map == nil then return end
 
     -- how far offset [0-1) tile we are in each direction
@@ -106,8 +127,13 @@ function camera:draw()
     end
 end
 
+function camera:print_tileno(tile_number)
+    love.graphics.print('tileno: ' .. tile_number, 30, 10)
+end
+
 function camera:get_quad(tile_number)
-    return self.quads[tile_number+1] -- Lua array starts at 1, tile ids start at 0
+    --return self.quads[101]
+    return self.quads[tile_number] -- Lua array starts at 1, tile ids start at 0
 end
 
 function camera:get_pos()
