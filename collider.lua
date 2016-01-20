@@ -22,18 +22,21 @@ function collider:init(map, pos_converter)
     self.map = map
     self.collision_offset = {}
     local tiles_that_collide = {}
-    for _, tile in pairs(self.map.tilesets) do -- for each tile type
-        local gid = tile.firstgid
-        if tile.tiles[1].properties["collide"] == "1" then
-            tiles_that_collide[gid] = true
+    for _, tileset in ipairs(self.map.tilesets) do -- for each tile type
+        for _, tile in ipairs(tileset.tiles) do
+            if tile.properties and tile.properties["collide"] == 1 then
+                tiles_that_collide[tile.id] = true
+            end
         end
     end
 
     --set collision_offset[offset] to true if tile at offset is a collider
     for _, layer in pairs(self.map.layers) do
-       for index, tile_gid in pairs(layer.data) do
-           if tiles_that_collide[tile_gid] == true then
+       for index, tile_number in pairs(layer.data) do
+            if tiles_that_collide[tile_number] == true then
                self.collision_offset[index] = true
+            else
+               self.collision_offset[index] = false
             end
         end
     end

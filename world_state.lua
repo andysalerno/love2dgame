@@ -1,7 +1,7 @@
-local level_one = require "maps/first_level"
+local level_one = require('maps/huge_level')
 local camera = require('camera')
 local pos_converter = require('pos_converter')
-local collider = require "collider"
+local collider = require('collider')
 require('player')
 
 local world_state = {}

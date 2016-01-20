@@ -16,6 +16,7 @@ end
 -- called every frame - can do drawing only here
 function love.draw()
     gamestate.draw()
+    love.graphics.print('FPS: ' .. love.timer.getFPS(), 10, 20)
 end
 
 -- also called every update 
