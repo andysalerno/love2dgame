@@ -1,11 +1,16 @@
+-- collider.lua
+-- collider will be used statically, with one instance handling all collisions in the world.
+-- :register() will add an object to the table of objects that can collide.
+-- :collides() will return true/false as appropriate if the x,y position passed to it collides with anything registered.
+-- There are two types of collisions: static world collisions, and dynamic collisions.
+-- static collisions are with objects in the world that never move, like walls and trees, and are registered
+-- at :init() time from information in the map.  This marks entire x,y tiles in the world as collidable forever.
+-- Dynamic collisions don't even exist yet in this file, and will either be unneeded or implemented later as necessary.
+
 local collider = {}
 collider.registered = {}
 collider.map = nil
-collider.collision_offset = {} -- map x,y location to the tiles there? is this a good idea?
--- collider will have a .collides(x, y), and a .register(some_obj)
--- .collides(x,y) returns true iff x,y intersects with some registered object
--- also will have a reference to the world so it can check world tile objects that
--- don't ever move.
+collider.collision_offset = {} 
 collider.pos_converter = nil
 
 function collider:register(collidable)
@@ -37,7 +42,7 @@ function collider:init(map, pos_converter)
             if tiles_that_collide[tile_number] == true then
                self.collision_offset[index] = true
             else
-               -- self.collision_offset[index] = false
+               self.collision_offset[index] = false
             end
         end
     end

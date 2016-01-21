@@ -1,9 +1,11 @@
 local camera = {
     map = nil,
+    player = nil,
+    player_quads = {},
     pos_converter = nil,
     world_tileset = {},
     spriteBatches = {},
-    quads = {},
+    world_quads = {},
     xy = {10, 10},
 }
 
@@ -19,10 +21,11 @@ function camera:set_pos(world_x, world_y)
     self.xy[2] = world_y
 end
 
-function camera:init(map, pos_converter)
+function camera:init(map, player,  pos_converter)
     print('camera init')
     self.pos_converter = pos_converter
     self.map = map 
+    self.player = player
     self.half_pix_width = math.floor(love.graphics.getWidth() / 2)
     self.half_pix_height = math.floor(love.graphics.getHeight() / 2)
     self.screen_tiles_width = math.floor(love.graphics.getWidth() / self.map.tilewidth) -- todo: don't floor it?
@@ -40,22 +43,29 @@ function camera:init(map, pos_converter)
     self.world_tileset.tiles_height = self.world_tileset.pix_height / self.map.tileheight
 
     -- one spriteBatch per layer, sourcing same tileset
-    for _, _ in ipairs(self.map.layers) do
-        print('adding tileset spritebatch layer...')
-        table.insert(self.spriteBatches,
-            love.graphics.newSpriteBatch(self.world_tileset.image,
-            (self.screen_tiles_width + 2) * (self.screen_tiles_width + 2)))
+    for index, layer in ipairs(self.map.layers) do
+        local spriteBatch = nil
+        if layer.name == 'player' then
+            self.player.layer = index
+            -- table.insert(self.player_quads, love.graphics.newQuad(0, 0, self.player.image:getWidth(), self.player.image:getHeight(), self.player.image:getWidth(), self.player.image:getHeight()))
+            -- spriteBatch = love.graphics.newSpriteBatch(self.player.image, 0) -- for now, assume only 8 sprites for player
+        else
+            spriteBatch = love.graphics.newSpriteBatch(self.world_tileset.image,
+                (self.screen_tiles_width + 3) * (self.screen_tiles_height + 3))
+            table.insert(self.spriteBatches, spriteBatch)    
+        end
+        --table.insert(self.spriteBatches, spriteBatch)    
     end
 
 
-    self.quads = {}
+    self.world_quads = {}
     for y=0,self.world_tileset.tiles_height-1 do
         for x=0,self.world_tileset.tiles_width-1 do
             local quad = love.graphics.newQuad(
                 x * self.map.tilewidth, y * self.map.tileheight,
                 self.map.tilewidth, self.map.tileheight,
                 self.world_tileset.image:getWidth(), self.world_tileset.image:getHeight())
-            table.insert(self.quads, quad)
+            table.insert(self.world_quads, quad)
         end
     end
 end
@@ -64,7 +74,7 @@ function camera:test_draw()
     for y=0,self.world_tileset.tiles_height-1 do
         for x=0,self.world_tileset.tiles_width-1 do
             local quad_num = y * self.world_tileset.tiles_width + x + 1
-            love.graphics.draw(self.world_tileset.image, self.quads[quad_num], x * self.map.tilewidth, y * self.map.tileheight)
+            love.graphics.draw(self.world_tileset.image, self.world_quads[quad_num], x * self.map.tilewidth, y * self.map.tileheight)
         end
     end
 end
@@ -110,14 +120,22 @@ function camera:draw()
 
     -- populate each layer (spriteBatch) with quads mapping to world tileset  
     for index, layer in ipairs(self.map.layers) do
-        for h=y_flat-1,y_flat+self.screen_tiles_height+1 do -- to render outside visible area for smoothness
-            for w=x_flat-1,x_flat+self.screen_tiles_width+1 do
-                if w >=0 and w < self.map.width and h >= 0 and h < self.map.height then
-                    local offset = self.pos_converter:world_to_offset(w,h)
-                    local tile_number = layer.data[offset]
-                    local tile_quad = self:get_quad(tile_number)
-                    self.spriteBatches[index]:add(tile_quad, 
-                        (w-x_offset-x_flat) * self.map.tilewidth, (h-y_offset-y_flat) * self.map.tileheight)
+        if layer.name == 'player' then
+            -- print('drawing player in layer' .. index)
+            -- local player_pix_x, player_pix_y = self.pos_converter:world_to_pixels(self.player.collidable.world_x, self.player.collidable.world_y)
+            -- love.graphics.draw(self.player.image, player_pix_x, player_pix_y, 0, 2)
+            -- self.spriteBatches[index]:add(self.player_quads[1], self.player.collidable.world_x, self.player.collidable.world_y, 0, 2)
+        else
+            -- print('drawing world layer' .. index)
+            for h=y_flat-1,y_flat+self.screen_tiles_height+1 do -- to render outside visible area for smoothness
+                for w=x_flat-1,x_flat+self.screen_tiles_width+1 do
+                    if w >=0 and w < self.map.width and h >= 0 and h < self.map.height then
+                        local offset = self.pos_converter:world_to_offset(w,h)
+                        local tile_number = layer.data[offset]
+                        local tile_quad = self:get_quad(tile_number)
+                        self.spriteBatches[index]:add(tile_quad, 
+                            (w-x_offset-x_flat) * self.map.tilewidth, (h-y_offset-y_flat) * self.map.tileheight)
+                    end
                 end
             end
         end
@@ -135,7 +153,7 @@ end
 
 function camera:get_quad(tile_number)
     --return self.quads[101]
-    return self.quads[tile_number] -- Lua array starts at 1, tile ids start at 0
+    return self.world_quads[tile_number] -- Lua array starts at 1, tile ids start at 0
 end
 
 function camera:get_pos()
