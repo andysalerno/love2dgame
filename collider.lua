@@ -41,8 +41,6 @@ function collider:init(map, pos_converter)
        for index, tile_number in pairs(layer.data) do
             if tiles_that_collide[tile_number] == true then
                self.collision_offset[index] = true
-            else
-               self.collision_offset[index] = false
             end
         end
     end

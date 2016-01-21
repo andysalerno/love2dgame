@@ -47,14 +47,13 @@ function camera:init(map, player,  pos_converter)
         local spriteBatch = nil
         if layer.name == 'player' then
             self.player.layer = index
-            -- table.insert(self.player_quads, love.graphics.newQuad(0, 0, self.player.image:getWidth(), self.player.image:getHeight(), self.player.image:getWidth(), self.player.image:getHeight()))
-            -- spriteBatch = love.graphics.newSpriteBatch(self.player.image, 0) -- for now, assume only 8 sprites for player
+            table.insert(self.player_quads, love.graphics.newQuad(0, 0, self.player.image:getWidth(), self.player.image:getHeight(), self.player.image:getWidth(), self.player.image:getHeight()))
+            spriteBatch = love.graphics.newSpriteBatch(self.player.image, 8) -- for now, assume only 8 sprites for player
         else
             spriteBatch = love.graphics.newSpriteBatch(self.world_tileset.image,
-                (self.screen_tiles_width + 3) * (self.screen_tiles_height + 3))
-            table.insert(self.spriteBatches, spriteBatch)    
+                (self.screen_tiles_width+1) * (self.screen_tiles_height+2))
         end
-        --table.insert(self.spriteBatches, spriteBatch)    
+        table.insert(self.spriteBatches, spriteBatch)    
     end
 
 
@@ -121,14 +120,13 @@ function camera:draw()
     -- populate each layer (spriteBatch) with quads mapping to world tileset  
     for index, layer in ipairs(self.map.layers) do
         if layer.name == 'player' then
-            -- print('drawing player in layer' .. index)
-            -- local player_pix_x, player_pix_y = self.pos_converter:world_to_pixels(self.player.collidable.world_x, self.player.collidable.world_y)
-            -- love.graphics.draw(self.player.image, player_pix_x, player_pix_y, 0, 2)
-            -- self.spriteBatches[index]:add(self.player_quads[1], self.player.collidable.world_x, self.player.collidable.world_y, 0, 2)
+            local player_pix_x, player_pix_y = self.pos_converter:world_to_pixels(self.player.collidable.world_x, self.player.collidable.world_y)
+            love.graphics.draw(self.player.image, player_pix_x, player_pix_y, 0, 2)
+            self.spriteBatches[index]:add(self.player_quads[1], player_pix_x, player_pix_y, 0, 2)
         else
             -- print('drawing world layer' .. index)
-            for h=y_flat-1,y_flat+self.screen_tiles_height+1 do -- to render outside visible area for smoothness
-                for w=x_flat-1,x_flat+self.screen_tiles_width+1 do
+            for h=y_flat,y_flat+self.screen_tiles_height+1 do -- to render outside visible area for smoothness
+                for w=x_flat,x_flat+self.screen_tiles_width do
                     if w >=0 and w < self.map.width and h >= 0 and h < self.map.height then
                         local offset = self.pos_converter:world_to_offset(w,h)
                         local tile_number = layer.data[offset]
