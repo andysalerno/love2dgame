@@ -24,8 +24,9 @@ function collider:init(map, pos_converter)
     local tiles_that_collide = {}
     for _, tileset in ipairs(self.map.tilesets) do -- for each tile type
         for _, tile in ipairs(tileset.tiles) do
-            if tile.properties and tile.properties["collide"] == 1 then
-                tiles_that_collide[tile.id] = true
+            if tile.properties and tile.properties["collide"] == "1" then
+                print('added colliding tile ' .. tile.id)
+                tiles_that_collide[tile.id+1] = true
             end
         end
     end
@@ -36,7 +37,7 @@ function collider:init(map, pos_converter)
             if tiles_that_collide[tile_number] == true then
                self.collision_offset[index] = true
             else
-               self.collision_offset[index] = false
+               -- self.collision_offset[index] = false
             end
         end
     end

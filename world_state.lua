@@ -6,7 +6,7 @@ require('player')
 
 local world_state = {}
 local m_player = player:new()
-m_player.speed = 10 
+m_player.speed = 5 
 m_player.image = love.graphics.newImage("tiles/player.png")
 m_player.image:setFilter("nearest", "nearest")
 

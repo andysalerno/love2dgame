@@ -44,7 +44,7 @@ function camera:init(map, pos_converter)
         print('adding tileset spritebatch layer...')
         table.insert(self.spriteBatches,
             love.graphics.newSpriteBatch(self.world_tileset.image,
-            (self.screen_tiles_width * self.screen_tiles_height) + 1)) 
+            (self.screen_tiles_width + 2) * (self.screen_tiles_width + 2)))
     end
 
 
@@ -70,7 +70,7 @@ function camera:test_draw()
 end
 
 
-function camera:drawdraw()
+function camera:draw_no_spritebatch() -- for emergency use only, if drawing with spriteBatch explodes
     if self.map == nil then return end
 
     -- how far offset [0-1) tile we are in each direction
@@ -94,6 +94,8 @@ function camera:drawdraw()
         end
     end
 end
+
+
 function camera:draw()
     if self.map == nil then return end
     for _, spriteBatch in ipairs(self.spriteBatches) do
