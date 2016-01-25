@@ -6,8 +6,20 @@ local camera = {
     world_tileset = {},
     spriteBatches = {},
     world_quads = {},
-    xy = {10, 10},
+    pos = {10, 10},
 }
+
+function camera:get_pos()
+    reutrn {self.pos[1], self.pos[2]}
+end
+
+function camera:getX()
+    return self.pos[1]
+end
+
+function camera:getY()
+    return self.pos[2]
+end
 
 function camera:center_on(world_x, world_y)
     local half_width = self.half_pix_width / self.map.tilewidth
@@ -17,8 +29,8 @@ function camera:center_on(world_x, world_y)
 end
 
 function camera:set_pos(world_x, world_y)
-    self.xy[1] = world_x
-    self.xy[2] = world_y
+    self.pos[1] = world_x
+    self.pos[2] = world_y
 end
 
 function camera:init(map, player,  pos_converter)
@@ -83,10 +95,10 @@ function camera:draw_no_spritebatch() -- for emergency use only, if drawing with
     if self.map == nil then return end
 
     -- how far offset [0-1) tile we are in each direction
-    local x_flat = math.floor(self.xy[1])
-    local y_flat = math.floor(self.xy[2])
-    local x_offset = self.xy[1] - x_flat 
-    local y_offset = self.xy[2] - y_flat
+    local x_flat = math.floor(self.pos[1])
+    local y_flat = math.floor(self.pos[2])
+    local x_offset = self.pos[1] - x_flat 
+    local y_offset = self.pos[2] - y_flat
 
     -- populate each layer (spriteBatch) with quads mapping to world tileset  
     for index, layer in ipairs(self.map.layers) do
@@ -112,15 +124,15 @@ function camera:draw()
     end
 
     -- how far offset [0-1) tile we are in each direction
-    local x_flat = math.floor(self.xy[1])
-    local y_flat = math.floor(self.xy[2])
-    local x_offset = self.xy[1] - x_flat 
-    local y_offset = self.xy[2] - y_flat
+    local x_flat = math.floor(self.pos[1])
+    local y_flat = math.floor(self.pos[2])
+    local x_offset = self.pos[1] - x_flat 
+    local y_offset = self.pos[2] - y_flat
 
     -- populate each layer (spriteBatch) with quads mapping to world tileset  
     for index, layer in ipairs(self.map.layers) do
         if layer.name == 'player' then
-            local player_pix_x, player_pix_y = self.pos_converter:world_to_pixels(self.player.collidable.world_x, self.player.collidable.world_y)
+            local player_pix_x, player_pix_y = self.pos_converter:world_to_pixels(self.player.pos[1], self.player.pos[2])
             love.graphics.draw(self.player.image, player_pix_x, player_pix_y, 0, 2)
             self.spriteBatches[index]:add(self.player_quads[1], player_pix_x, player_pix_y, 0, 2)
         else
@@ -155,7 +167,7 @@ function camera:get_quad(tile_number)
 end
 
 function camera:get_pos()
-    return xy[1], xy[2]
+    return pos[1], pos[2]
 end
 
 return camera

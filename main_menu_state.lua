@@ -43,7 +43,7 @@ function main_menu.keypressed(key, scancode, isrepeat)
     end
 end
 
-function main_menu.draw(dt)
+function main_menu.draw()
     for i=1,menu_length do
         love.graphics.print(menu_options[i], menu_x, menu_y + (80 * i - 1) - (font_size / 2))
     end

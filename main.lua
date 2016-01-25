@@ -1,11 +1,20 @@
 -- Global functions go here (before requires, to be accessible everywhere)
+require('class')
 gamestates = {main_menu_state, world_state}
 gamestates.main_menu_state = require("main_menu_state")
 gamestates.world_state = require("world_state")
 
+function check_type(object, parent)
+    if getmetatable(object) == parent then
+        return true
+    else
+        return false
+    end
+end
+
 function set_gamestate(state)
     gamestate = state
-    gamestate.init()
+    gamestate:init()
 end
 
 

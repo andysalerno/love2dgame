@@ -1,28 +1,20 @@
--- collider.lua
--- collider will be used statically, with one instance handling all collisions in the world.
--- :register() will add an object to the table of objects that can collide.
--- :collides() will return true/false as appropriate if the x,y position passed to it collides with anything registered.
--- There are two types of collisions: static world collisions, and dynamic collisions.
--- static collisions are with objects in the world that never move, like walls and trees, and are registered
--- at :init() time from information in the map.  This marks entire x,y tiles in the world as collidable forever.
--- Dynamic collisions don't even exist yet in this file, and will either be unneeded or implemented later as necessary.
+local collidable = require('collidable')
 
-local collider = {}
-collider.registered = {}
-collider.map = nil
-collider.collision_offset = {} 
-collider.pos_converter = nil
+local collider = {
+    registered = {},
+    map = nil,
+    collisionoffset = {},
+    pos_converter = nil,
+}
 
-function collider:register(collidable)
-    if collidable.world_x == nil or collidable.world_y == nil
-        or collidable.pix_width == nil or collidable.pix_height == nil then
-        print('tried to register collision collidable without world_x or world_y!')
-        return
-    end
+function collider:register(input_collidable)
+    assert(check_type(input_collidable, collidable), "tried to register a non-collidable")
     table.insert(self.registered, collidable)
 end
 
 function collider:init(map, pos_converter)
+    assert(map ~= nil, "nil map passed to collider:init()")
+    assert(pos_converter ~= nil, "nil pos_converter passed to collider:init()")
     self.pos_converter = pos_converter
     self.map = map
     self.collision_offset = {}
@@ -46,16 +38,23 @@ function collider:init(map, pos_converter)
     end
 end
 
-function collider:collides(world_x, world_y)
-    -- first, check if we have collided with any collidable tiles
-    -- in the world.
-    if self.map == nil then
-        print('map not set in collider!')
-    end
-    local world_x = math.floor(world_x)
-    local world_y = math.floor(world_y)
-    local offset = self.pos_converter:world_to_offset(world_x, world_y)
-    if self.collision_offset[offset] == true then -- don't 'optimize' this to one line, lua interprets weirdly
+function collider:collides(input_collidable, dx, dy)
+    assert(self.map ~= nil, "collider didn't have a proper map.")
+    assert(check_type(input_collidable, collidable), "collides() was passed an improper collidable")
+    
+    local x = math.floor(input_collidable.x + dx)
+    local y = math.floor(input_collidable.y + dy)
+
+    local top_left = self.pos_converter:world_to_offset(x, y)
+    local top_right = self.pos_converter:world_to_offset(x + input_collidable.width, y)
+    local bot_left = self.pos_converter:world_to_offset(x, y + input_collidable.height)
+    local bot_right = self.pos_converter:world_to_offset(x + input_collidable.width, y + input_collidable.height)
+
+    -- local offset = self.pos_converter:world_to_offset(x, y)
+    if self.collision_offset[top_left] == true or
+        self.collision_offset[top_right] == true or
+        self.collision_offset[bot_left] == true or
+        self.collision_offset[bot_right] == true then
         return true
     else
         return false
