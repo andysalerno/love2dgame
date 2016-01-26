@@ -1,3 +1,4 @@
 -- Describes a character in the world, parent class for player character, etc
-character = class:new() 
+local character = class:new() 
+return character
 

@@ -43,14 +43,15 @@ function camera:init(map, player,  pos_converter)
     self.screen_tiles_width = math.floor(love.graphics.getWidth() / self.map.tilewidth) -- todo: don't floor it?
     self.screen_tiles_height = math.floor(love.graphics.getHeight() / self.map.tileheight)
 
-    if self.map.tilesets[1].image == nil then print("couldn't access world tileset!") end
+    assert(self.map.tilesets[1].image ~= nil, "couldn't access world tileset")
     self.world_tileset.image = love.graphics.newImage(self.map.tilesets[1].image)
     self.world_tileset.image:setFilter("nearest", "nearest")
     print('opened image ' .. self.map.tilesets[1].image)
     self.world_tileset.pix_width = self.world_tileset.image:getWidth()
     self.world_tileset.pix_height = self.world_tileset.image:getHeight()
-    if self.world_tileset.pix_width % self.map.tilewidth ~= 0 then print('tileset not a multiple of tilewidth!') end
-    if self.world_tileset.pix_height % self.map.tileheight ~= 0 then print('tileset not a multiple of tileheight!') end
+
+    assert(self.world_tileset.pix_width % self.map.tilewidth == 0, "tileset not a multiple of tilewidth")
+    assert(self.world_tileset.pix_height % self.map.tileheight == 0, "tileset not a multiple of tileheight")
     self.world_tileset.tiles_width = self.world_tileset.pix_width / self.map.tilewidth
     self.world_tileset.tiles_height = self.world_tileset.pix_height / self.map.tileheight
 
@@ -118,7 +119,6 @@ end
 
 
 function camera:draw()
-    if self.map == nil then return end
     for _, spriteBatch in ipairs(self.spriteBatches) do
         spriteBatch:clear()
     end
@@ -133,10 +133,8 @@ function camera:draw()
     for index, layer in ipairs(self.map.layers) do
         if layer.name == 'player' then
             local player_pix_x, player_pix_y = self.pos_converter:world_to_pixels(self.player.pos[1], self.player.pos[2])
-            love.graphics.draw(self.player.image, player_pix_x, player_pix_y, 0, 2)
-            self.spriteBatches[index]:add(self.player_quads[1], player_pix_x, player_pix_y, 0, 2)
+            self.spriteBatches[index]:add(self.player_quads[1], player_pix_x, player_pix_y, 0, self.player.scale)
         else
-            -- print('drawing world layer' .. index)
             for h=y_flat,y_flat+self.screen_tiles_height+1 do -- to render outside visible area for smoothness
                 for w=x_flat,x_flat+self.screen_tiles_width do
                     if w >=0 and w < self.map.width and h >= 0 and h < self.map.height then
@@ -155,19 +153,11 @@ function camera:draw()
         spriteBatch:flush()
         love.graphics.draw(spriteBatch)
     end
-end
-
-function camera:print_tileno(tile_number)
-    love.graphics.print('tileno: ' .. tile_number, 30, 10)
+    self.player.collidable:draw(self.pos_converter)
 end
 
 function camera:get_quad(tile_number)
-    --return self.quads[101]
     return self.world_quads[tile_number] -- Lua array starts at 1, tile ids start at 0
-end
-
-function camera:get_pos()
-    return pos[1], pos[2]
 end
 
 return camera

@@ -1,6 +1,6 @@
-require('character')
+local character = require('character')
 local collidable = require('collidable')
-player = character:new() 
+local player = character:new() 
 
 function player:new(pos, speed, image, pos_converter)
     new_player = character:new()
@@ -26,10 +26,15 @@ function player:init(pos, speed, image, pos_converter)
     self.pos_converter = pos_converter
     self.image = love.graphics.newImage(image)
     self.image:setFilter('nearest', 'nearest')
+    self.scale = 2
 
-    self.half_height = (self.image:getHeight() / 2) / self.pos_converter:get_tile_length()
-    self.width = (self.image:getWidth()) / self.pos_converter:get_tile_length()
-    self.height = (self.image:getHeight()) / self.pos_converter:get_tile_length()
+    self.half_height = (self.image:getHeight() / 2) / self.pos_converter:get_tile_length() * self.scale
+    self.width = (self.image:getWidth()) / self.pos_converter:get_tile_length() * self.scale
+    self.height = (self.image:getHeight()) / self.pos_converter:get_tile_length() * self.scale
+
+    print('player width: ' .. self.width)
+    print('player height: ' .. self.height)
+    print('player halfheight: ' .. self.half_height)
 
     self.collidable = collidable:new()
     self:update_collidable()
@@ -45,9 +50,6 @@ function player:move(dt, collider)
     if love.keyboard.isDown('down', 's') then
         dy = dy + diff
     end
-    if not collider:collides(self.collidable, 0, dy) then
-        self.pos[2] = self.pos[2] + dy
-    end
 
     local dx = 0
     if love.keyboard.isDown('left', 'a') then
@@ -56,8 +58,13 @@ function player:move(dt, collider)
     if love.keyboard.isDown('right', 'd') then
         dx = dx + diff
     end
+
+
     if not collider:collides(self.collidable, dx, 0) then
         self.pos[1] = self.pos[1] + dx
+    end
+    if not collider:collides(self.collidable, 0, dy) then
+        self.pos[2] = self.pos[2] + dy
     end
 
     self:update_collidable()
@@ -70,3 +77,5 @@ function player:update_collidable()
     self.collidable.width = self.width
     self.collidable.height = self.height / 2
 end
+
+return player

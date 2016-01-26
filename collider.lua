@@ -44,20 +44,30 @@ function collider:collides(input_collidable, dx, dy)
     
     local x = math.floor(input_collidable.x + dx)
     local y = math.floor(input_collidable.y + dy)
+    for h=0,input_collidable.height do
+        for w=0,input_collidable.width do
+            local offset = self.pos_converter:world_to_offset(math.floor(x+w), math.floor(y+h))
+            if self.collision_offset[offset] == true then
+                return true
+            end
+        end
+    end
 
-    local top_left = self.pos_converter:world_to_offset(x, y)
-    local top_right = self.pos_converter:world_to_offset(x + input_collidable.width, y)
-    local bot_left = self.pos_converter:world_to_offset(x, y + input_collidable.height)
-    local bot_right = self.pos_converter:world_to_offset(x + input_collidable.width, y + input_collidable.height)
+    return false
+end
 
-    -- local offset = self.pos_converter:world_to_offset(x, y)
-    if self.collision_offset[top_left] == true or
-        self.collision_offset[top_right] == true or
-        self.collision_offset[bot_left] == true or
-        self.collision_offset[bot_right] == true then
-        return true
-    else
-        return false
+-- do insertion sort on the nearly-sorted registered objects
+function collider:sort_collidables()
+    local size = #self.registered
+    for i=2,size do
+        local sample = self.registered[i].x
+        local back_index = i - 1
+        while back_index >= 1 and self.registered[back_index].x > sample do
+            self.registered[back_index + 1] = self.registered[back_index]
+            back_index = back_index - 1
+        end
+
+        self.registered[back_index + 1] = sample
     end
 end
 

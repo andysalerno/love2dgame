@@ -2,7 +2,7 @@ local level_one = require('maps/thirtytwo')
 local camera = require('camera')
 local collider = require('collider')
 local pos_converter = require('pos_converter')
-require('player')
+local player = require('player')
 
 local world_state = {}
 
