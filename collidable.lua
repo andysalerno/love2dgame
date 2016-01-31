@@ -1,8 +1,9 @@
-local collidable = class:new({
+local collidable = class:newT({
     x = nil,
     y = nil,
     height = nil,
     width = nil,
+    is_stationary = nil,
 })
 
 function collidable:set_pos(x, y)

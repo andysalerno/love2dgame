@@ -1,46 +1,39 @@
-local character = require('character')
+local Character = require('character')
 local collidable = require('collidable')
-local player = character:new() 
+local Player = Character:new() 
 
-function player:new(pos, speed, image, pos_converter)
-    new_player = character:new()
-    self:init(pos, speed, image, pos_converter)
-    return new_player
-end
-
-function player:get_pos()
+function Player:get_pos()
     return {self.pos[1], self.pos[2]}
 end
 
-function player:getX()
+function Player:getX()
     return self.pos[1]
 end
 
-function player:getY()
+function Player:getY()
     return self.pos[2]
 end
 
-function player:init(pos, speed, image, pos_converter)
-    self.pos = pos
-    self.speed = speed
-    self.pos_converter = pos_converter
-    self.image = love.graphics.newImage(image)
+function Player:init(...)
+    print('player #args: ' .. #{...})
+    self.world, self.pos, self.speed, self.image_name = unpack({...})
+    self.image = love.graphics.newImage(self.image_name)
     self.image:setFilter('nearest', 'nearest')
     self.scale = 2
+    
+    self.half_height = (self.image:getHeight() / 2) / self.world.raw.tilewidth * self.scale
+    self.width = (self.image:getWidth()) / self.world.raw.tilewidth * self.scale
+    self.height = (self.image:getHeight()) / self.world.raw.tileheight * self.scale
 
-    self.half_height = (self.image:getHeight() / 2) / self.pos_converter:get_tile_length() * self.scale
-    self.width = (self.image:getWidth()) / self.pos_converter:get_tile_length() * self.scale
-    self.height = (self.image:getHeight()) / self.pos_converter:get_tile_length() * self.scale
-
-    print('player width: ' .. self.width)
-    print('player height: ' .. self.height)
-    print('player halfheight: ' .. self.half_height)
+    print('Player width: ' .. self.width)
+    print('Player height: ' .. self.height)
+    print('Player halfheight: ' .. self.half_height)
 
     self.collidable = collidable:new()
     self:update_collidable()
 end
 
-function player:move(dt, collider)
+function Player:move(dt, collider)
     local diff = dt * self.speed
 
     local dy = 0
@@ -70,7 +63,7 @@ function player:move(dt, collider)
     self:update_collidable()
 end
 
-function player:update_collidable()
+function Player:update_collidable()
     assert(self.collidable)
     self.collidable.x = self.pos[1]
     self.collidable.y = self.pos[2] + self.half_height
@@ -78,4 +71,4 @@ function player:update_collidable()
     self.collidable.height = self.height / 2
 end
 
-return player
+return Player

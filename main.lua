@@ -31,6 +31,6 @@ end
 -- also called every update 
 function love.update(dt)
     dt = math.min(dt, 0.01666667)
-    gamestate.update(dt)
+    gamestate:update(dt)
 end
 

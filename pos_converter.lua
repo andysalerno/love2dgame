@@ -2,7 +2,7 @@ local pos_converter = {camera_pos_table, map}
 
 function pos_converter:init(camera_pos_table, map)
     self.camera_pos_table = camera_pos_table
-    self.map = map
+    self.map = map.raw
 end
 
 function pos_converter:get_tile_length()
@@ -16,7 +16,7 @@ function pos_converter:world_to_offset(x, y)
 end
 
 function pos_converter:screen_to_offset(screen_x, screen_y)
-    if self.map == nil then return end
+    assert(self.map ~= nil)
     local x, y = self:screen_to_world(screen_x, screen_y)
     return self:world_to_offset(x, y)
 end
